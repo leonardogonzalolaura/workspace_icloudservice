@@ -1,1 +1,1 @@
-from .icloudservice import Service
+from .icloudservice import Service, Provider
