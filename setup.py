@@ -10,7 +10,7 @@ setup(
         'boto3',  # AWS SDK for Python
         'rich', # Progress bar library
     ],
-    description='The `icloudservice` class provides a Python interface for interacting with' 
+    description='The `icloudservice` class provides a Python interface for interacting with',
     long_description=open('README.md').read(),  # Long description from README
     long_description_content_type='text/markdown',  # Type of long description
     author='Leonardo Daniel Gonzalo Laura',  # Replace with your name
