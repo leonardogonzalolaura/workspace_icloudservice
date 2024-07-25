@@ -8,6 +8,10 @@ setup(
     #packages=find_packages(include=['icloudservice', 'icloudservice.*']),
     packages=find_packages(where='icloudservice/src'),
     package_dir={'': 'icloudservice/src'},
+    package_data={
+        '': ['icloudservice.py'],  # Incluye el archivo icloudservice.py
+    },
+    include_package_data=True,
     install_requires=[
         'boto3',  # AWS SDK for Python
         'rich', # Progress bar library
