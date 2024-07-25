@@ -5,7 +5,9 @@ setup(
     name='icloudservice',  # Replace with your library name
     use_scm_version=True,
     setup_requires=["setuptools>=42", "setuptools_scm"],
-    packages=find_packages(include=['icloudservice', 'icloudservice.*']),
+    #packages=find_packages(include=['icloudservice', 'icloudservice.*']),
+    packages=find_packages(where='icloudservice/src'),
+    package_dir={'': 'icloudservice/src'},
     install_requires=[
         'boto3',  # AWS SDK for Python
         'rich', # Progress bar library
