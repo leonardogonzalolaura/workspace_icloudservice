@@ -2,8 +2,8 @@ import platform
 import importlib.metadata
 from dataclasses import dataclass
 from rich.console import Console
-from icloudservice.src.provider.aws.aws_provider import AWSCloud
-from icloudservice.src.provider.azure.azure_provider import  AzureCloud
+from .src.provider.aws.aws_provider import AWSCloud
+from .src.provider.azure.azure_provider import  AzureCloud
 
 # Get the Python version
 python_version = platform.python_version()
