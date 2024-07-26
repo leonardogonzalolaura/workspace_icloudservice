@@ -32,7 +32,6 @@ class Provider():
     console = Console()
 
     def AWS(self,access_key:str,secret_key:str):
-        self.console.print(f"[cyan]Aws[/cyan]")
         return AWSCloud(access_key,secret_key)
     
     def AZURE(self,subscription_id):
