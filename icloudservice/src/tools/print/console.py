@@ -6,7 +6,7 @@ class Console:
     WARNING_COLOR = '\033[93m' # Yellow
     ERROR_COLOR = '\033[91m'   # Red
     RESET_COLOR = '\033[0m'    # Reset to default
-    BOLD = '\033[1m'           # Bold text
+    BOLD = '\033[0m'           # Bold text
     UNDERLINE = '\033[4m'      # Underline text
     MAGENTA =  '\033[35m'
 
