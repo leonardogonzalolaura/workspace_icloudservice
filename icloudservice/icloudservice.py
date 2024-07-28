@@ -31,7 +31,7 @@ class Service():
 class Provider():
     console = Console()
 
-    def AWS(self,access_key:str,secret_key:str,region:str):
+    def AWS(self,access_key:str,secret_key:str,region:str = None):
         """
         Initializes an AWS Cloud client with the provided access key and secret key.
 

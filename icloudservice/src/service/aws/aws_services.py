@@ -13,17 +13,17 @@ class AWSService:
         self.region_name = region
         self.session = botocore.session.get_session()
 
-    def create_client(self, service_name: str):
+    def create_client(self, service_name: str,region_name:str = None):
         return self.session.create_client(
             service_name,
             aws_access_key_id=self.access_key,
             aws_secret_access_key=self.secret_key,
-            region_name=self.region_name
+            region_name=region_name or self.region_name
         )
 
 class S3Service():
-    def __init__(self, aws_service: AWSService, bucket_name: str):
-        self.client = aws_service.create_client('s3')
+    def __init__(self, aws_service: AWSService, bucket_name: str,region: str = None):
+        self.client = aws_service.create_client('s3',region_name=region)
         self.bucket_name = bucket_name
         self.console = Console()
 
