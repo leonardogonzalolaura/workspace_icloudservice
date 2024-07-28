@@ -126,45 +126,43 @@ class EC2Service:
         self.console = Console()
 
     def start_instance(self, instance_id: str) -> ITableData:
-        progress = ProgressIndicator(message="Waiting for instance to start")
-        progress.start()
-        response = self.client.start_instances(InstanceIds=[instance_id])
+        with ProgressIndicator(message=f"Waiting for instance to start {instance_id}") as progress:
+            response = self.client.start_instances(InstanceIds=[instance_id])
 
-        start_info = response['StartingInstances'][0]
-        instance_id = start_info['InstanceId']
-        current_state = start_info['CurrentState']['Name']
-        previous_state = start_info['PreviousState']['Name']
+            start_info = response['StartingInstances'][0]
+            instance_id = start_info['InstanceId']
+            current_state = start_info['CurrentState']['Name']
+            previous_state = start_info['PreviousState']['Name']
 
-        start_info_dict = []
-        start_info_dict.append({
-            "Instance ID": instance_id,
-            "Current State": current_state,
-            "Previous State": previous_state
-        })
+            start_info_dict = []
+            start_info_dict.append({
+                "Instance ID": instance_id,
+                "Current State": current_state,
+                "Previous State": previous_state
+            })
 
-        print(ITableData(start_info_dict))
+            #print(ITableData(start_info_dict))
 
-        while True:
-            instance_description = self.client.describe_instances(InstanceIds=[instance_id])
-            instance = instance_description['Reservations'][0]['Instances'][0]
-            instance_state = instance['State']['Name']
+            while True:
+                instance_description = self.client.describe_instances(InstanceIds=[instance_id])
+                instance = instance_description['Reservations'][0]['Instances'][0]
+                instance_state = instance['State']['Name']
 
-            if instance_state == 'running':
-                instance_dns = instance.get('PublicDnsName', 'No DNS available')
-                instance_name = self._get_instance_name(instance)
-                instance_details = []
-                instance_details.append({
-                    "Instance ID": instance_id,
-                    "State": instance_state,
-                    "Name": instance_name,
-                    "DNS": instance_dns
-                })
-                progress.stop(f"\nInstance {instance_id} is now fully running!")
-                return ITableData(instance_details)
-            self.console.info(f"\nInstance {instance_id} is {instance_state}. Waiting for it to be fully running...")
-            time.sleep(10)
-        
-        
+                if instance_state == 'running':
+                    instance_dns = instance.get('PublicDnsName', 'No DNS available')
+                    instance_name = self._get_instance_name(instance)
+                    instance_details = []
+                    instance_details.append({
+                        "Instance ID": instance_id,
+                        "State": instance_state,
+                        "Name": instance_name,
+                        "Os version": self.get_instance_os(instance_id),
+                        "DNS": instance_dns
+                    })
+                    progress.stop(f"\nInstance {instance_id} is now fully running!")
+                    return ITableData(instance_details)
+                self.console.info(f"\nInstance {instance_id} is {instance_state}. Waiting for it to be fully running...")
+                time.sleep(10)
     def _get_instance_name(self, instance):
         # Buscar el nombre en las etiquetas
         for tag in instance.get('Tags', []):
@@ -173,66 +171,65 @@ class EC2Service:
         return 'No Name Tag'
     
     def stop_instance(self, instance_id: str) ->ITableData:
-        response = self.client.stop_instances(InstanceIds=[instance_id])
-        instance_init = []
+        with ProgressIndicator(message=f"Waiting for instance to stop {instance_id}") as progress:
+            response = self.client.stop_instances(InstanceIds=[instance_id])
+            instance_init = []
 
-        for instance in response['StoppingInstances']:
-            instance_data = {
-                "Instance ID": instance['InstanceId'],
-                "Current State": instance['CurrentState']['Name'],
-                "Previous State": instance['PreviousState']['Name']
-            }
-            instance_init.append(instance_data)
-        print(ITableData(instance_init))
-        instance_stop = []
-        progress = ProgressIndicator(message="Waiting for instance to stop")
-        progress.start()
-        while True:
-            instance_description = self.client.describe_instances(InstanceIds=[instance_id])
-            instance = instance_description['Reservations'][0]['Instances'][0]
-            instance_state = instance['State']['Name']
+            for instance in response['StoppingInstances']:
+                instance_data = {
+                    "Instance ID": instance['InstanceId'],
+                    "Current State": instance['CurrentState']['Name'],
+                    "Previous State": instance['PreviousState']['Name']
+                }
+                instance_init.append(instance_data)
+            instance_stop = []
+            while True:
+                instance_description = self.client.describe_instances(InstanceIds=[instance_id])
+                instance = instance_description['Reservations'][0]['Instances'][0]
+                instance_state = instance['State']['Name']
 
-            if instance_state == 'stopped':
-                instance_stop.append({
-                    "Instance ID": instance_id,
-                    "State": instance_state,
-                    "Name": self._get_instance_name(instance),
-                    "DNS": instance.get('PublicDnsName', 'No DNS available')
-                })
-                break
-            time.sleep(10)
-        progress.stop(f'Instance {instance_id} is now fully stopped!')
+                if instance_state == 'stopped':
+                    instance_stop.append({
+                        "Instance ID": instance_id,
+                        "State": instance_state,
+                        "Name": self._get_instance_name(instance),
+                        "Os version": self.get_instance_os(instance_id),
+                        "DNS": instance.get('PublicDnsName', 'No DNS available')
+                    })
+                    break
+                self.console.info(f"\nInstance {instance_id} is {instance_state}. Waiting for it to be fully stopped...")
+                time.sleep(10)
+            progress.stop(f'Instance {instance_id} is now fully stopped!')
         return ITableData(instance_stop)
                 
     def describe_instances(self, instance_id: str = None) ->ITableData:
-        progress = ProgressIndicator(message="Waiting ") 
-        progress.start()
-        # Fetch instances
-        if instance_id:
-            response = self.client.describe_instances(InstanceIds=[instance_id])
-        else:
-            response = self.client.describe_instances()
-        
-        
-        instances = []
-        # find all instances or the enter instance_ids 
-        for reservation in response['Reservations']:
-            for instance in reservation['Instances']:
-                instance_id = instance['InstanceId']
-                instance_state = instance['State']['Name']
-                instance_name = self._get_instance_name(instance)
-                instance_dns = instance.get('PublicDnsName', 'No DNS available')
-                instance_ip = instance.get('PublicIpAddress', 'No IP available')
-                os_info = self.get_instance_os(instance['InstanceId'])
-                instances.append({
-                    "Instance ID": instance_id,
-                    "Name": instance_name,
-                    "Status":instance_state,
-                    "Public DNS": instance_dns,
-                    "Public IP": instance_ip,
-                    "Type OS": os_info
-                })
-        progress.stop('Finished successfully')             
+        with ProgressIndicator(message="Waiting ") as progress:
+            # Fetch instances
+            if instance_id:
+                response = self.client.describe_instances(InstanceIds=[instance_id])
+            else:
+                response = self.client.describe_instances()
+            
+            
+            instances = []
+            # find all instances or the enter instance_ids 
+            for reservation in response['Reservations']:
+                for instance in reservation['Instances']:
+                    instance_id = instance['InstanceId']
+                    instance_state = instance['State']['Name']
+                    instance_name = self._get_instance_name(instance)
+                    instance_dns = instance.get('PublicDnsName', 'No DNS available')
+                    instance_ip = instance.get('PublicIpAddress', 'No IP available')
+                    os_info = self.get_instance_os(instance['InstanceId'])
+                    instances.append({
+                        "Instance ID": instance_id,
+                        "Name": instance_name,
+                        "Status":instance_state,
+                        "Public DNS": instance_dns,
+                        "Public IP": instance_ip,
+                        "Type OS": os_info
+                    })
+            progress.stop('Finished successfully')
         return ITableData(instances)
 
     def get_instance_os(self, instance_id):
