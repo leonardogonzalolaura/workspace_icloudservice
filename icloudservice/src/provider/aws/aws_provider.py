@@ -2,8 +2,8 @@ from icloudservice.src.service.aws.aws_services import AWSService
 from icloudservice.src.service.aws.aws_services import S3Service,LambdaService,EC2Service,SNSService,SQSService
 
 class AWSCloud(AWSService):
-    def __init__(self, access_key: str, secret_key: str):
-        super().__init__(access_key,secret_key)
+    def __init__(self, access_key: str, secret_key: str,region:str):
+        super().__init__(access_key,secret_key,region)
     def S3Service(self, bucket_name: str):
         return S3Service(self, bucket_name)
 

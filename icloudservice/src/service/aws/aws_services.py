@@ -1,5 +1,5 @@
 import json
-import boto3
+import botocore.session
 import time
 from icloudservice.src.tools.format.table_formatter import ITableData
 from icloudservice.src.tools.progress.progress import ProgressIndicator
@@ -7,15 +7,18 @@ from icloudservice.src.tools.print.console import Console
 from icloudservice.src.tools.util import  FileUtils as util
 from icloudservice.src.tools.format.color_text import AnsiColors as color
 class AWSService:
-    def __init__(self, access_key: str, secret_key: str):
+    def __init__(self, access_key: str, secret_key: str,region: str = None):
         self.access_key = access_key
         self.secret_key = secret_key
+        self.region_name = region
+        self.session = botocore.session.get_session()
 
     def create_client(self, service_name: str):
-        return boto3.client(
+        return self.session.create_client(
             service_name,
             aws_access_key_id=self.access_key,
-            aws_secret_access_key=self.secret_key
+            aws_secret_access_key=self.secret_key,
+            region_name=self.region_name
         )
 
 class S3Service():
@@ -32,7 +35,8 @@ class S3Service():
             remote_path = util.get_path(remote_path, local_file_name)
         with ProgressIndicator(message="Uploading file") as progress:
             try:
-                self.client.upload_file(local_path, self.bucket_name, remote_path)
+                with open(local_path, 'rb') as file:
+                    self.client.put_object(Bucket=self.bucket_name, Key=remote_path, Body=file)
             except Exception as e:
                 progress.stop(final_message=f"Upload failed: {str(e)}", final_message_color=color.FAIL)
 
@@ -41,7 +45,9 @@ class S3Service():
             local_path = util.get_local_path_default(remote_path)
         with ProgressIndicator(message="Downloading file") as progress:
             try:
-                self.client.download_file(self.bucket_name, remote_path, local_path)
+                response = self.client.get_object(Bucket = self.bucket_name, Key = remote_path)
+                with open(local_path, 'wb') as file:
+                    file.write(response['Body'].read())
             except Exception as e:
                 progress.stop(final_message=f"Download failed: {str(e)}", final_message_color=color.FAIL)
 

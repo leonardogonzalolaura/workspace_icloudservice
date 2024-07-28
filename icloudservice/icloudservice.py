@@ -31,7 +31,7 @@ class Service():
 class Provider():
     console = Console()
 
-    def AWS(self,access_key:str,secret_key:str):
+    def AWS(self,access_key:str,secret_key:str,region:str):
         """
         Initializes an AWS Cloud client with the provided access key and secret key.
 
@@ -42,7 +42,7 @@ class Provider():
         Returns:
             AWSCloud: An instance of the AWSCloud class.
         """
-        return AWSCloud(access_key,secret_key)
+        return AWSCloud(access_key,secret_key,region)
     
     def AZURE(self,subscription_id):
         """

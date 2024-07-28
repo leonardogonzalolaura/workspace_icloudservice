@@ -8,8 +8,11 @@ setup(
     packages=find_packages(include=['icloudservice', 'icloudservice.*']),
     include_package_data=True,
     install_requires=[
-        'boto3',  # AWS SDK for Python
-        'rich', # Progress bar library
+        'botocore',  # AWS SDK for Python
+        'azure-storage-blob',
+        'azure-servicebus',
+        'azure-identity',
+        'azure-cosmos'
     ],
     description='The `icloudservice` class provides a Python interface for interacting with',
     long_description=open('README.md').read(),  # Long description from README
