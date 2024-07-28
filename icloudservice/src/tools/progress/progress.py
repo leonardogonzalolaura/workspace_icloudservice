@@ -4,7 +4,7 @@ from threading import Thread
 from icloudservice.src.tools.format.color_text import AnsiColors
 
 class ProgressIndicator:
-    def __init__(self, message: str, interval: float = 0.5, color: str = AnsiColors.OKBLUE):
+    def __init__(self, message: str, interval: float = 0.2, color: str = AnsiColors.OKBLUE):
         self.message = message
         self.interval = interval
         self.color = color
@@ -14,6 +14,9 @@ class ProgressIndicator:
         self.start_time = None
         self.exception_occurred = False
         self.stopped = False
+        self.spinner_chars = ['|', '/', '-', '\\','']
+        self.colors = ['\033[91m', '\033[92m', '\033[93m', '\033[94m', '\033[95m', '\033[96m']
+        self.reset_color = '\033[0m'
 
     def start(self):
         """Starts the progress indicator animation."""
@@ -25,16 +28,20 @@ class ProgressIndicator:
 
     def _run(self):
         """Internal logic for the progress indicator thread."""
+        idx = 0
+        color_idx = 0
         while self.running:
-            for i in range(3):
+            for i in range(5):
                 if not self.running:
                     break
-                sys.stdout.write(f'\r{self.color}{self.message} {"." * (i + 1)}{self.reset_color}')
+                sys.stdout.write(f'\r{self.color}{self.message} {"." * (i + 1)}{self.reset_color}{self.colors[color_idx]}{self.spinner_chars[idx]}{self.reset_color}')
                 sys.stdout.flush()
+                idx = (idx + 1) % len(self.spinner_chars)
+                color_idx = (color_idx + 1) % len(self.colors)
                 time.sleep(self.interval)
         
         # Clear the final line
-        sys.stdout.write('\r' + ' ' * (len(self.message) + 4) + '\r')
+        sys.stdout.write('\r' + ' ' * (len(self.message) + 6) + '\r')
         sys.stdout.flush()
 
     def stop(self, final_message: str = None, final_message_color: str = AnsiColors.OKGREEN):
