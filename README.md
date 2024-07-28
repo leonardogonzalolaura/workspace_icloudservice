@@ -31,13 +31,14 @@ The `Provider` class is used to create cloud service clients for AWS and Azure. 
 
 **Methods:**
 
-- **`AWS(access_key: str, secret_key: str) -> AWSCloud`**
+- **`AWS(access_key: str, secret_key: str,region: str = None) -> AWSCloud`**
 
   Initializes an AWS Cloud client with the provided access key and secret key.
 
   **Parameters:**
   - `access_key` (str): AWS access key ID.
   - `secret_key` (str): AWS secret access key.
+  - `region` (str,optional): The AWS region to use. Default to None.
 
   **Returns:**
   - An instance of the `AWSCloud` class.
@@ -58,12 +59,13 @@ Provides access to various AWS cloud services.
 
 **Methods:**
 
-- **`S3Service(bucket_name: str)`**
+- **`S3Service(bucket_name: str,region: str = None)`**
 
   Provides access to AWS S3 service.
 
   **Parameters:**
   - `bucket_name` (str): The name of the S3 bucket.
+  - `region` (str): The region of the S3 bucket to use.Default to None.
 
   **Returns:**
   - An instance of the `S3Service` class.
