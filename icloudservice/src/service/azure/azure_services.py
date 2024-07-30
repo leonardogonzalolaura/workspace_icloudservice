@@ -2,7 +2,6 @@ from azure.storage.blob import BlobServiceClient
 from azure.servicebus import ServiceBusClient, ServiceBusMessage
 from azure.identity import DefaultAzureCredential
 from azure.cosmos import CosmosClient
-from rich.progress import Progress
 
 
 class AzureService:
@@ -52,12 +51,9 @@ class BlobStorageService:
         container_client = self.client.get_container_client(self.container_name)
         blobs = list(container_client.list_blobs())
         total_blobs = len(blobs)
-        with Progress() as progress:
-            task = progress.add_task("[cyan]Listing blobs...", total=total_blobs)
-            blob_names = []
-            for blob in blobs:
-                blob_names.append(blob.name)
-                progress.update(task, advance=1)
+        blob_names = []
+        for blob in blobs:
+            blob_names.append(blob.name)
 
         return blob_names
 

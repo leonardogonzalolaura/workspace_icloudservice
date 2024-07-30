@@ -11,7 +11,6 @@
 
 - Integration with AWS and Azure cloud services.
 - Provides easy-to-use methods for interacting with cloud resources.
-- Rich logging and output formatting.
 
 ## Installation
 
